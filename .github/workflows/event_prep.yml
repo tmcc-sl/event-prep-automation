@@ -4,7 +4,16 @@ on:
   schedule:
     # Runs every day at 8:00 AM ET (12:00 UTC)
     - cron: '0 12 * * *'
-  workflow_dispatch:  # Allows you to run it manually from GitHub
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: 'Run in backfill mode (creates subtasks for existing events)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   run-automation:
@@ -12,10 +21,10 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -25,4 +34,9 @@ jobs:
       - name: Run Event Prep Automation
         env:
           ASANA_TOKEN: ${{ secrets.ASANA_TOKEN }}
-        run: python event_prep_automation.py
+        run: |
+          if [ "${{ github.event.inputs.backfill }}" = "true" ]; then
+            python event_prep_automation.py --backfill
+          else
+            python event_prep_automation.py
+          fi
