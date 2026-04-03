@@ -110,7 +110,7 @@ def get_all_subtasks_for_phase(phase_key: str, event_date: date) -> list:
     for p in PHASE_ORDER[:phase_idx + 1]:
         phase_def = PHASE_SUBTASKS[p]
         for name, offset, assignee_type in phase_def["tasks"]:
-            due = event_date if p == "during" else default_due
+            due = event_date if p == "during" else today + timedelta(days=offset)
             all_tasks.append((name, due, assignee_type))
     return all_tasks
 
